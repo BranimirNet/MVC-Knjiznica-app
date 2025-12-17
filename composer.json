@@ -1,0 +1,17 @@
+{
+    "name": "knjiznica/app",
+    "description": "MVC primjer s posudbama knjiga",
+    "autoload": {
+        "psr-4": {
+            "App\\": "app/",
+            "Corea": "core/"
+        }
+    },
+    "authors": [
+        {
+            "name": "BranimirNet",
+            "email": "branimir.netrebasic@gmail.com"
+        }
+    ],
+    "require": {}
+}
