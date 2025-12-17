@@ -64,6 +64,10 @@ main {
     gap: 30px;
 }
 
+main p{
+    line-height: 150%;
+}
+
 label{
     display: block;
 }
