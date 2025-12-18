@@ -2,8 +2,10 @@
 
 namespace App\Controllers;
 
+use App\Services\MailService;
 use Core\Controller;
-USE App\Models\Korisnik;
+use Core\Url;
+use App\Models\Korisnik;
 
 class HomeController extends Controller{
 
@@ -13,7 +15,7 @@ class HomeController extends Controller{
 
     public function register(): void{
 
-        if($_SERVER["REQUEST_METHOD"]==="POST"){
+        if($_SERVER["REQUEST_METHOD"]==="POST" && !isset($_POST["sendMail"])){
             $activationKey=Korisnik::create($_POST);
 
             $_SESSION['activation']=[
@@ -24,6 +26,16 @@ class HomeController extends Controller{
             ];
 
             $this->view('home/activation-preview');
+            return;
+        }
+
+        if(isset($_POST["sendMail"]) && isset($_SESSION["activation"])){
+            //slanje mail-a
+            MailService::sendActivation(
+                $_SESSION["activation"]["email"],
+                Url::base()."/index.php?page=activate&key=".$_SESSION["activation"]["key"]
+            );
+            unset($_SESSION["activation"]);
             return;
         }
         $this->view('home/register');
@@ -37,6 +49,33 @@ class HomeController extends Controller{
         {
             echo "Neispravan aktivacijski link!";
         }
+    }
+
+    public function login(){
+
+        if($_SERVER["REQUEST_METHOD"]==="POST"){
+            $user = Korisnik::authenticate($_POST["korime"],$_POST["sifra"]);
+
+            if($user){
+                $_SESSION["user"]=[
+                    'id'=>$user["id"],
+                    'korime'=>$user["korime"],
+                    'tip'=>$user["tip_naziv"]
+                ];
+
+                header("Location: index.php");
+                exit;
+            }
+            $this->view('home/login',['error'=>'Neispravni podaci za prijavu ili račun nije aktivan']);
+            return;
+        }
+        $this->view('home/login');
+    }
+
+    public function logout(): void{
+        session_destroy();
+        header("Location: index.php?page=login");
+        exit;
     }
 
 }

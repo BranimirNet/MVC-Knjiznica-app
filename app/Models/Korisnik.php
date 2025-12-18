@@ -47,5 +47,24 @@ class Korisnik{
 
         return $stmt->rowCount()===1;
     }
+
+    public static function authenticate(string $korime, string $sifra): ?array{
+        $db = Database::getInstance();
+
+        $sql="SELECT k.*, t.naziv as tip_naziv
+        from Korisnik k inner join TipKorisnika t ON k.idTipKorisnik = t.id
+        where k.korime= :korime and k.statusrn = 1";
+
+        $stmt=$db->prepare($sql);
+        $stmt->execute([':korime'=>$korime]);
+
+        $user = $stmt->fetch();
+
+        if($user && password_verify($sifra,$user["sifra"])){
+            return $user;
+        }
+
+        return null;
+    }
 }
 
